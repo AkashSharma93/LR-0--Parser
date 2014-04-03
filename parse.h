@@ -1,4 +1,4 @@
-struct Stack {
+struct Stack {	//Holds states.
 	int states[100];
 	int top;
 } stack;
@@ -13,17 +13,17 @@ void pop() {
 	stack.top--;
 }
 
-int get_top() {
+int get_top() {		//Returns top of stack state.
 	return stack.states[stack.top];
 }
 
-void initialize_stack() {
+void initialize_stack() {	//Initialize stack to have state 0 on top.
 	stack.top = -1;
 	
 	push(0);
 }
 
-int get_int(char *s) {
+int get_int(char *s) {		//Get integer part of the strings found in table entries.
 	int i, j;
 	char temp[10];
 	
@@ -38,7 +38,7 @@ int get_int(char *s) {
 	return atoi(temp);
 }
 
-int get_length(char *production) {
+int get_length(char *production) {	//Returns length of string in the production body.
 	int i, j;
 
 	for(i = 0; production[i] != '>'; i++);
@@ -49,7 +49,10 @@ int get_length(char *production) {
 	return j;
 }
 
-void get_stack_contents(char *t) {
+
+//Start of functions meant only for displaying the result. (Doesn't affect the actual string parsing)
+
+void get_stack_contents(char *t) {	//Stores stack contents in t.
 	int i;
 	char c[5];
 
@@ -62,7 +65,7 @@ void get_stack_contents(char *t) {
 	}
 }
 
-void get_remaining_input(char *string, int index, char *t) {
+void get_remaining_input(char *string, int index, char *t) {	//Stores remaining Input string in t.
 	int i, j;
 
 	for(i = index, j = 0; string[i] != '\0'; i++, j++)
@@ -71,7 +74,7 @@ void get_remaining_input(char *string, int index, char *t) {
 	t[j] = '\0';
 }
 
-void print_contents(char *string, int index, char *matched_string) {
+void print_contents(char *string, int index, char *matched_string) {	//Prints the required stuff.
 	char t1[20], t2[20];
 
 	get_stack_contents(t1);
@@ -80,6 +83,9 @@ void print_contents(char *string, int index, char *matched_string) {
 	printf("\t|  %-25s  |  %-25s  |   %25s  |  \t", t1, matched_string, t2);
 }
 
+//End of functions meant only for displaying the result.
+
+
 void parse() {
 	char string[100];
 	char matched_string[100];
@@ -87,7 +93,7 @@ void parse() {
 	printf("\nEnter a string: ");
 	scanf("%s", string);
 
-	strcat(string, "$");
+	strcat(string, "$");	//Appending $ to end of input string.
 	matched_string[0] = '\0';
 	
 	printf("\nThe reduction steps for the given string are as follows...\n\n");
@@ -101,9 +107,9 @@ void parse() {
 
 		print_contents(string, index, matched_string);
 
-		if(table.ACTION[get_top()][get_pos(0, a)][0] == 'S') {		//Shift Action.
+		if(table.ACTION[get_top()][get_pos(0, a)][0] == 'S') {		//Shift Action. (Table entry starts with char 'S')
 			int t = get_int(table.ACTION[get_top()][get_pos(0, a)]);
-			push(t);
+			push(t);	//Push state t onto stack.
 			index++;
 
 			//Printing the result.
@@ -123,13 +129,13 @@ void parse() {
 		else if(table.ACTION[get_top()][get_pos(0, a)][0] == 'R') {	//Reduce Action.
 			int i, j = get_int(table.ACTION[get_top()][get_pos(0, a)]);
 
-			for(i = 0; i < get_length(augmented_grammar[j]); i++)
+			for(i = 0; i < get_length(augmented_grammar[j]); i++)	//Pop "length of string" times, w.r.t production 'j'.
 				pop();
 			
 			int t = get_top();
-			char A = augmented_grammar[j][0];
+			char A = augmented_grammar[j][0];	//Production head of 'j'th production. (non-terminal)
 
-			push(table.GOTO[t][get_pos(1, A)]);
+			push(table.GOTO[t][get_pos(1, A)]);	//Push state using GOTO of the table.
 
 			//Printing the result.
 			m_index -= get_length(augmented_grammar[j]);

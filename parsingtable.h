@@ -1,10 +1,10 @@
 //Parsing Table.
-struct Parsing_Table {	//Try converting to dynamic memory allocation.
+struct Parsing_Table {	//Structure to represent the Parsing Table.	
 	char ACTION[30][100][100];
 	int GOTO[30][100];
 } table;
 
-void initialize_table() {
+void initialize_table() {  //Initialize all entries to indicate Error.
 	int i, j;
 
 	for(i = 0; i < no_of_states; i++) {
@@ -56,7 +56,7 @@ void print_table() {
 	}
 }
 
-void Goto(int i, int item, char *temp) {
+void Goto(int i, int item, char *temp) {	//Computes goto for 'item'th item of 'i'th state.
 	char t;
 
 	strcpy(temp, items[i][item]);
@@ -70,10 +70,10 @@ void Goto(int i, int item, char *temp) {
 		}
 }
 
-int get_state(char *t, int state) {
+int get_state(char *t, int state) {	//Returns the state of a given item.
 	int i, j;
 
-	for(i = state; i < (no_of_states + state); i++) {	//Start searching from current state.
+	for(i = state; i < (no_of_states + state); i++) {	//Start searching from current state and then wrap around.
 		for(j = 0; j < no_of_items[i % no_of_states]; j++) {
 			if(!strcmp(t, items[i % no_of_states][j]))
 				return i % no_of_states;
@@ -83,7 +83,7 @@ int get_state(char *t, int state) {
 	printf("No match for string! (%s)\n", t);
 }
 
-int get_pos(int flag, char symbol) {
+int get_pos(int flag, char symbol) {	//Returns index of a terminal or a non-terminal from the corresponding arrays.
 	int i;
 
 	if(flag == 0)
@@ -103,7 +103,7 @@ int get_pos(int flag, char symbol) {
 		printf("Non-terminal not found in get_pos! (%c)\n", symbol);
 }
 
-int get_production_no(char * item) {
+int get_production_no(char * item) {	//Given an item, it returns the production number of the equivalent production.
 	int i, j;
 	
 	char production[20];
@@ -135,14 +135,14 @@ void compute_action() {
 	
 	for(i = 0; i < no_of_states; i++) {
 		for(item = 0; item < no_of_items[i]; item++) {
-			char *s = strchr(items[i][item], '.');
+			char *s = strchr(items[i][item], '.');	//Returns a substring starting with '.'
 			
 			if(!s) {	//In case of error.
 				printf("Item not found! State = %d, Item = %d\n", i, item);
 				exit(-1);
 			}
 
-			if(strlen(s) > 1) {	//dot is not at end of string.
+			if(strlen(s) > 1) {	//dot is not at end of string. SHIFT ACTION!!
 				if(isterminal(s[1])) {		//For terminals. Rule 1.
 					if(strcmp(table.ACTION[i][get_pos(0,s[1])], "e")) {		//Multiple entries conflict.
 						printf("\n\nConflict(1): Multiple entries found for (%d, %c)\n", i, s[1]);
@@ -167,12 +167,12 @@ void compute_action() {
 					Goto(i, item, temp);	//Store item in temp.
 					j = get_state(temp, i);
 
-					if(table.GOTO[i][get_pos(1, s[1])] == -1)
+					if(table.GOTO[i][get_pos(1, s[1])] == -1)	//To avoid multiple entries.
 						table.GOTO[i][get_pos(1, s[1])] = j;
 				}
 			}
 
-			else {	//dot is at end of string and State is greater than 1. Rule 2.				
+			else {	//dot is at end of string. Rule 2. REDUCE ACTION!!	
 				char f[10], production_no[3];
 				int k, n;
 				n = get_production_no(items[i][item]);		//Get production number from Augmented Grammar.
@@ -181,7 +181,7 @@ void compute_action() {
 				strcpy(temp, "R:");
 				strcat(temp, production_no);
 				
-				strcpy(f, FOLLOW[get_pos(1, items[i][item][0])]);
+				strcpy(f, FOLLOW[get_pos(1, items[i][item][0])]);	//Get follow of production head.
 				for(k = 0; f[k] != '\0'; k++) {
 					if(strcmp(table.ACTION[i][get_pos(0, f[k])], "e")) {		//Multiple entries conflict.
 						printf("\n\nConflict(3): Multiple entries found for (%d, %c)\n", i, f[k]);
@@ -195,7 +195,7 @@ void compute_action() {
 		}
 	}
 
-	strcpy(table.ACTION[1][get_pos(0, '$')], "acc");
+	strcpy(table.ACTION[1][get_pos(0, '$')], "acc");	//Accept-entry for item [S'->S.]
 }
 
 void create_parsing_table() {

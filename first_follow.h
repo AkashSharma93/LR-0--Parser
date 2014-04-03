@@ -1,6 +1,6 @@
 int epsilon_flag = 0;
 
-initialize_first_follow() {
+initialize_first_follow() {	//Initialize to null strings.
 	int i;
 
 	for(i = 0; i < no_of_terminals; i++)
@@ -74,7 +74,7 @@ void first(char s) {
 				j++;
 				char next_sym = augmented_grammar[i][j];
 
-				if(next_sym == '@') {
+				if(next_sym == '@') {	//Epsilon Production.
 					add_symbol(0, FIRST[1][get_pos(1, s)], "@");
 					flag = 1;
 				}
