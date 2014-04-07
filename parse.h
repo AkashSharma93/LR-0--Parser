@@ -90,6 +90,8 @@ void parse() {
 	char string[100];
 	char matched_string[100];
 
+	initialize_stack();
+
 	printf("\nEnter a string: ");
 	scanf("%s", string);
 
